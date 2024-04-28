@@ -1,0 +1,8 @@
+# Paquetes pip que son necesarios instalar para que funcionen los programas:
+os
+requests
+beautifulsoup4
+PyPDF2
+re
+requests
+urllib3
