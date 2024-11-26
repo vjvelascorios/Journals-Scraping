@@ -3,44 +3,105 @@ name: Python CI
 on:
   schedule:
     - cron: '0 0 1 * *' # Runs monthly on the first day at midnight
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
+    inputs:
+      debug:
+        type: boolean
+        description: 'Run in debug mode'
+        required: false
+        default: false
+      environment:
+        type: choice
+        description: 'Environment to run'
+        options:
+          - development
+          - production
+        required: true
+        default: 'development'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=code/ --cov-report=xml
 
     - name: Run Python scripts
       run: |
+        set -e
         for file in code/*.py; do
-          python "$file"
+          echo "Running $file"
+          python "$file" || { echo "Error in $file"; exit 1; }
         done
+      shell: bash
+
+    - name: Generate timestamp
+      id: timestamp
+      run: echo "timestamp=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add .
-        git commit -m 'Automated commit by GitHub Actions'
-        git push
+        git diff --quiet && git diff --staged --quiet || (
+          git commit -m "Auto update: ${{ steps.timestamp.outputs.timestamp }}
+
+          Environment: ${{ github.event.inputs.environment }}
+          Triggered by: ${{ github.event_name }}"
+          git push
+        )
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
       with:
-        name: python-scripts-output
+        name: coverage-report
+        path: coverage.xml
+
+    - name: Upload script outputs
+      uses: actions/upload-artifact@v3
+      with:
+        name: script-outputs-${{ steps.timestamp.outputs.timestamp }}
         path: code/
+        retention-days: 5
+
+    - name: Status check
+      if: always()
+      run: |
+        if [[ "${{ job.status }}" == "success" ]]; then
+          echo "✅ Workflow completed successfully"
+        else
+          echo "❌ Workflow failed"
+          exit 1
+        fi
