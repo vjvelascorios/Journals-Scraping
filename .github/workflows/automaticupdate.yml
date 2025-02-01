@@ -1,8 +1,8 @@
-name: Runner
+name: Python CI
 
 on:
   schedule:
-    - cron: '0 6 1 * *' # Runs monthly on the first day at midnight UTC-6
+    - cron: '0 0 1 * *' # Runs monthly on the first day at midnight
   workflow_dispatch:
     inputs:
       debug:
@@ -19,15 +19,12 @@ on:
         required: true
         default: 'development'
 
-# Prevent multiple workflow runs
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-version: ['3.8']
 
     steps:
     - name: Checkout repository
@@ -35,25 +32,76 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: '3.8'
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest pytest-cov
 
-    - name: Run script
-      run: python main.py
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=code/ --cov-report=xml
+
+    - name: Run Python scripts
+      run: |
+        set -e
+        for file in code/*.py; do
+          echo "Running $file"
+          python "$file" || { echo "Error in $file"; exit 1; }
+        done
+      shell: bash
+
+    - name: Generate timestamp
+      id: timestamp
+      run: echo "timestamp=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add .
-        git commit -m "Auto update data $(date +'%Y-%m-%d')" || echo "No changes to commit"
-        git push
+        git diff --quiet && git diff --staged --quiet || (
+          git commit -m "Auto update: ${{ steps.timestamp.outputs.timestamp }}
+
+          Environment: ${{ github.event.inputs.environment }}
+          Triggered by: ${{ github.event_name }}"
+          git push
+        )
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage.xml
+
+    - name: Upload script outputs
+      uses: actions/upload-artifact@v4
+      with:
+        name: script-outputs-${{ steps.timestamp.outputs.timestamp }}
+        path: code/
+        retention-days: 5
+
+    - name: Status check
+      if: always()
+      run: |
+        if [[ "${{ job.status }}" == "success" ]]; then
+          echo "✅ Workflow completed successfully"
+        else
+          echo "❌ Workflow failed"
+          exit 1
+        fi
