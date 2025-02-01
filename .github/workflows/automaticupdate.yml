@@ -24,14 +24,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PYTHON_VERSION: '3.8'  # Changed to more stable version
-  TIMEOUT_MINUTES: 30
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ env.TIMEOUT_MINUTES }}
+    timeout-minutes: 30
 
     steps:
     - name: Checkout repository
@@ -42,14 +38,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Debug Info
-      run: |
-        python --version
-        pip --version
-        pwd
-        ls -la
+        python-version: '3.8'
 
     - name: Install dependencies
       run: |
@@ -57,20 +46,13 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run script
-      run: |
-        python main.py
-      continue-on-error: false
-
-    - name: List generated files
-      run: |
-        ls -la data/
+      run: python main.py
 
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add .
-        git status
         git commit -m "Auto update data $(date +'%Y-%m-%d')" || echo "No changes to commit"
         git push
       env:
