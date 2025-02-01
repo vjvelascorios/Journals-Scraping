@@ -1,5 +1,5 @@
 # Paquetes pip que son necesarios instalar para que funcionen los programas:
-os
+#os
 requests
 beautifulsoup4
 PyPDF2
