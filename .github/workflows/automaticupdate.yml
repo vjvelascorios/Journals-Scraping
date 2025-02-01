@@ -96,7 +96,7 @@ jobs:
       run: |
         if [[ "${{ job.status }}" == "success" ]]; then
           echo "✅ Workflow completed successfully"
-        else
+        else:
           echo "❌ Workflow failed"
           exit 1
         fi
