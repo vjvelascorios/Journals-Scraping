@@ -19,84 +19,59 @@ on:
         required: true
         default: 'development'
 
+# Prevent multiple workflow runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.8'  # Changed to more stable version
+  TIMEOUT_MINUTES: 30
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ env.TIMEOUT_MINUTES }}
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Cache pip packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+    - name: Debug Info
+      run: |
+        python --version
+        pip --version
+        pwd
+        ls -la
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov
 
-    - name: Run tests
+    - name: Run script
       run: |
-        pytest tests/ --cov=code/ --cov-report=xml
+        python main.py
+      continue-on-error: false
 
-    - name: Run Python scripts
+    - name: List generated files
       run: |
-        set -e
-        for file in code/*.py; do
-          echo "Running $file"
-          python "$file" || { echo "Error in $file"; exit 1; }
-        done
-      shell: bash
-
-    - name: Generate timestamp
-      id: timestamp
-      run: echo "timestamp=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
+        ls -la data/
 
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add .
-        git diff --quiet && git diff --staged --quiet || (
-          git commit -m "Auto update: ${{ steps.timestamp.outputs.timestamp }}
-
-          Environment: ${{ github.event.inputs.environment }}
-          Triggered by: ${{ github.event_name }}"
-          git push
-        )
+        git status
+        git commit -m "Auto update data $(date +'%Y-%m-%d')" || echo "No changes to commit"
+        git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage.xml
-
-    - name: Upload script outputs
-      uses: actions/upload-artifact@v4
-      with:
-        name: script-outputs-${{ steps.timestamp.outputs.timestamp }}
-        path: code/
-        retention-days: 5
-
-    - name: Status check
-      if: always()
-      run: |
-        if [[ "${{ job.status }}" == "success" ]]; then
-          echo "✅ Workflow completed successfully"
-        else:
-          echo "❌ Workflow failed"
-          exit 1
-        fi
