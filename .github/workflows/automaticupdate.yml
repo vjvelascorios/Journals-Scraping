@@ -1,4 +1,4 @@
-name: Python CI
+name: Journals
 
 on:
   schedule:
@@ -36,6 +36,7 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pdf-renamer==1.1
 
 
     - name: Run Python scripts

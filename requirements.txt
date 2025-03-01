@@ -1,14 +1,10 @@
-# Paquetes pip que son necesarios instalar para que funcionen los programas:
-#os
 requests
 beautifulsoup4
-PyPDF2
-#re
-requests
 urllib3
-# Core dependencies
 lxml>=4.9.0
-# Optional but recommended
 chardet>=5.0.0
 certifi>=2023.7.22
 idna>=3.4
+PyPDF2
+aiohttp
+tqdm
