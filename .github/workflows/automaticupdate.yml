@@ -81,13 +81,17 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+        # Actualizar el branch para incorporar cambios remotos
+        git pull --rebase origin ${{ github.ref }} || true
+        
         git add .
         git diff --quiet && git diff --staged --quiet || (
           git commit -m "Auto update: ${{ steps.timestamp.outputs.timestamp }}
 
           Environment: ${{ github.event.inputs.environment }}
           Triggered by: ${{ github.event_name }}"
-          # Usar GITHUB_TOKEN en la URL para autenticación
+          
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
         )
       env:
