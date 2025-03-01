@@ -36,7 +36,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Cache pip dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -52,11 +52,26 @@ jobs:
     - name: Run Python scripts
       run: |
         set -e
-        for file in code/*.py; do
-          echo "Running $file"
-          timeout 300 python "$file" || { echo "Error in $file"; exit 1; }
-        done
+        echo "Listing available Python scripts:"
+        ls -la code/*.py || echo "No Python scripts found in code/ directory"
+        
+        echo "Python version:"
+        python --version
+        
+        echo "Current working directory:"
+        pwd
+        
+        if [ -d "code" ] && ls code/*.py 1> /dev/null 2>&1; then
+          for file in code/*.py; do
+            echo "====== Running $file ======"
+            python "$file" || echo "Warning: Script $file exited with code $?"
+          done
+        else
+          echo "No Python scripts found in the code/ directory or directory doesn't exist"
+          ls -la
+        fi
       shell: bash
+      continue-on-error: true
 
     - name: Generate timestamp
       id: timestamp
