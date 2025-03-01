@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 
 class PDFDownloader:
-    def __init__(self, urls: List[str], output_dir: str = "pdfs", rate_limit: float = 1.0):
+    def __init__(self, urls: List[str], output_dir: str = "pdfs_inae", rate_limit: float = 1.0):
         self.urls = urls
         self.output_dir = Path(output_dir)
         self.rate_limit = rate_limit
@@ -32,29 +32,36 @@ class PDFDownloader:
 
     async def download_pdf(self, url: str, filename: str) -> bool:
         """
-        Download a single PDF file asynchronously.
+        Download a single PDF file asynchronously if it doesn't exist.
         
         Args:
             url: URL of the PDF file
             filename: Output filename
         
         Returns:
-            bool: True if download successful, False otherwise
+            bool: True if file exists or download successful, False otherwise
         """
+        file_path = self.output_dir / filename
+        
+        # Verificar si el archivo ya existe
+        if file_path.exists():
+            logging.info(f"Archivo {filename} ya existe, omitiendo descarga")
+            return True
+            
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
                     if response.status == 200:
-                        file_path = self.output_dir / filename
                         content = await response.read()
                         with open(file_path, 'wb') as f:
                             f.write(content)
+                        logging.info(f"Descargado exitosamente: {filename}")
                         return True
                     else:
-                        logging.error(f"Failed to download {url}: Status {response.status}")
+                        logging.error(f"Error al descargar {url}: Status {response.status}")
                         return False
         except Exception as e:
-            logging.error(f"Error downloading {url}: {str(e)}")
+            logging.error(f"Error al descargar {url}: {str(e)}")
             return False
 
     def get_pdf_links(self, url: str) -> List[str]:

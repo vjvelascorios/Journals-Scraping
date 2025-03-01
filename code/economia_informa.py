@@ -68,9 +68,18 @@ def obtener_enlaces_pdf(url_numero):
 
 # Limpiar el texto del título del artículo para que sea un nombre de archivo válido
 def limpiar_nombre_archivo(texto):
-    texto = re.sub(r'[\\/*?:"<>|]', '', texto)  # Eliminar caracteres no permitidos en nombres de archivo
-    texto = re.sub(r'[^\x00-\x7F]+', '', texto)  # Eliminar caracteres no ASCII
-    return texto[:100]  # Limitar la longitud del nombre del archivo a 100 caracteres
+    # Reemplazar saltos de línea y espacios múltiples
+    texto = ' '.join(texto.split())
+    # Eliminar caracteres no permitidos en nombres de archivo
+    texto = re.sub(r'[\\/*?:"<>|]', '', texto)
+    # Eliminar caracteres no ASCII y acentos
+    texto = re.sub(r'[^\x00-\x7F]+', '', texto)
+    # Reemplazar espacios múltiples por un solo espacio
+    texto = re.sub(r'\s+', ' ', texto)
+    # Eliminar espacios al inicio y final
+    texto = texto.strip()
+    # Limitar la longitud del nombre del archivo
+    return texto[:50]  # Reducido a 50 caracteres para mayor seguridad
 
 # Obtener la página índice
 url_indice = 'http://www.economia.unam.mx/publicaciones/econinforma/wanteriores/anteriorl.html'
@@ -84,10 +93,32 @@ except requests.exceptions.Timeout:
 if not os.path.exists('pdfs_econinfo'):
     os.makedirs('pdfs_econinfo')
 
+# Agregar esta función para verificar si un número ya está procesado
+def numero_ya_procesado(numero):
+    """
+    Verifica si un número de la revista ya ha sido procesado completamente.
+    
+    Args:
+        numero (str): Número de la revista a verificar
+    
+    Returns:
+        bool: True si el número ya está procesado, False en caso contrario
+    """
+    # Verifica si existe tanto el PDF combinado como el directorio con los PDFs individuales
+    pdf_combinado = f"pdfs_econinfo/{numero}.pdf"
+    directorio_individual = f"pdfs_econinfo/{numero}"
+    return os.path.exists(pdf_combinado) and os.path.exists(directorio_individual)
+
 # Recorrer los enlaces a los números de la revista en la página índice
 for enlace_numero in soup_indice.find_all('a', href=True):
     if enlace_numero['href'].startswith('/assets/pdfs/econinfo/'):
         numero = enlace_numero.text.strip()
+        
+        # Verificar si el número ya está procesado
+        if numero_ya_procesado(numero):
+            print(f"El número {numero} ya está procesado, saltando...")
+            continue
+            
         url_numero = f"http://www.economia.unam.mx{enlace_numero['href']}"
         print(f"Descargando número {numero}...")
         
@@ -188,9 +219,18 @@ def obtener_enlaces_pdf(url_numero):
 
 # Limpiar el texto del título del artículo para que sea un nombre de archivo válido
 def limpiar_nombre_archivo(texto):
-    texto = re.sub(r'[\\/*?:"<>|]', '', texto)  # Eliminar caracteres no permitidos en nombres de archivo
-    texto = re.sub(r'[^\x00-\x7F]+', '', texto)  # Eliminar caracteres no ASCII
-    return texto[:100]  # Limitar la longitud del nombre del archivo a 100 caracteres
+    # Reemplazar saltos de línea y espacios múltiples
+    texto = ' '.join(texto.split())
+    # Eliminar caracteres no permitidos en nombres de archivo
+    texto = re.sub(r'[\\/*?:"<>|]', '', texto)
+    # Eliminar caracteres no ASCII y acentos
+    texto = re.sub(r'[^\x00-\x7F]+', '', texto)
+    # Reemplazar espacios múltiples por un solo espacio
+    texto = re.sub(r'\s+', ' ', texto)
+    # Eliminar espacios al inicio y final
+    texto = texto.strip()
+    # Limitar la longitud del nombre del archivo
+    return texto[:50]  # Reducido a 50 caracteres para mayor seguridad
 
 # Obtener la página índice
 url_indice = 'http://www.economia.unam.mx/publicaciones/econinforma/wanteriores/anteriorl.html'
@@ -204,10 +244,32 @@ except requests.exceptions.Timeout:
 if not os.path.exists('pdfs_econinfo'):
     os.makedirs('pdfs_econinfo')
 
+# Agregar esta función para verificar si un número ya está procesado
+def numero_ya_procesado(numero):
+    """
+    Verifica si un número de la revista ya ha sido procesado completamente.
+    
+    Args:
+        numero (str): Número de la revista a verificar
+    
+    Returns:
+        bool: True si el número ya está procesado, False en caso contrario
+    """
+    # Verifica si existe tanto el PDF combinado como el directorio con los PDFs individuales
+    pdf_combinado = f"pdfs_econinfo/{numero}.pdf"
+    directorio_individual = f"pdfs_econinfo/{numero}"
+    return os.path.exists(pdf_combinado) and os.path.exists(directorio_individual)
+
 # Recorrer los enlaces a los números de la revista en la página índice
 for enlace_numero in soup_indice.find_all('a', href=True):
     if enlace_numero['href'].startswith('/assets/pdfs/econinfo/'):
         numero = enlace_numero.text.strip()
+        
+        # Verificar si el número ya está procesado
+        if numero_ya_procesado(numero):
+            print(f"El número {numero} ya está procesado, saltando...")
+            continue
+            
         url_numero = f"http://www.economia.unam.mx{enlace_numero['href']}"
         print(f"Descargando número {numero}...")
 
