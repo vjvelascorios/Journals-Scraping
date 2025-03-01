@@ -13,6 +13,9 @@ on:
         options: [development, production]
         default: 'development'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,19 +35,26 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install dependencies
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
         pip install pdf-renamer==1.1
 
-
     - name: Run Python scripts
       run: |
         set -e
         for file in code/*.py; do
           echo "Running $file"
-          python "$file" || { echo "Error in $file"; exit 1; }
+          timeout 300 python "$file" || { echo "Error in $file"; exit 1; }
         done
       shell: bash
 
@@ -62,23 +72,11 @@ jobs:
 
           Environment: ${{ github.event.inputs.environment }}
           Triggered by: ${{ github.event_name }}"
-          git push
+          # Usar GITHUB_TOKEN en la URL para autenticación
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
         )
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4   # Updated from v3
-      with:
-        name: coverage-report
-        path: coverage.xml
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4    # Already at v4
-      with:
-        name: script-outputs-${{ steps.timestamp.outputs.timestamp }}
-        path: code/
-        retention-days: 5
 
     - name: Status check
       if: always()
