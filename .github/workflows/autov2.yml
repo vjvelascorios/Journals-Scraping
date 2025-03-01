@@ -1,0 +1,67 @@
+name: Journals Automation
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [development, production]
+        default: 'development'
+
+permissions:
+  contents: write
+
+jobs:
+  execute-scripts:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Asegurar que estamos en la rama correcta
+        ref: ${{ github.head_ref || github.ref }}
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt pdf-renamer==1.1
+
+    - name: Execute Python scripts
+      run: |
+        echo "=== Directorio actual ==="
+        pwd
+        
+        # Ejecutar todos los scripts en el directorio code/
+        for script in code/*.py; do
+          echo "Ejecutando: $script"
+          python "$script" || exit 1  # Falla el paso si algún script falla
+        done
+        
+        echo "=== Archivos generados ==="
+        ls -lR
+
+    - name: Commit and push changes
+      run: |
+        # Configurar Git
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
+        # Verificar cambios
+        if git status --porcelain; then
+          echo "🔄 Cambios detectados, realizando commit..."
+          git add .
+          git commit -m "Auto-update: $(date +'%Y-%m-%d %H:%M:%S')"
+          git push
+        else
+          echo "✅ No hay cambios para commitear"
+        fi
+      env:
+        # Autenticación para push
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
