@@ -1406,3 +1406,13 @@
 2025-09-01 02:45:54,438 - INFO - Archivo u3l2.pdf ya existe, omitiendo descarga
 2025-09-01 02:45:55,439 - INFO - Archivo u3l3.pdf ya existe, omitiendo descarga
 2025-09-01 02:45:56,441 - INFO - Archivo u3l4.pdf ya existe, omitiendo descarga
+2025-10-01 02:36:30,266 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-i: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-i
+2025-10-01 02:36:30,267 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-i
+2025-10-01 02:36:30,609 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-ii: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-ii
+2025-10-01 02:36:30,610 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-ii
+2025-10-01 02:36:30,882 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-iii: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-iii
+2025-10-01 02:36:30,883 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-iii
+2025-10-01 02:36:31,168 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-iv: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-iv
+2025-10-01 02:36:31,169 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-iv
+2025-10-01 02:36:31,506 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-v: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-v
+2025-10-01 02:36:31,507 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-v
