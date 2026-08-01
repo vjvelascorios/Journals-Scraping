@@ -1506,3 +1506,13 @@
 2026-07-01 05:08:24,781 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-iv
 2026-07-01 05:08:25,278 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-v: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-v
 2026-07-01 05:08:25,278 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-v
+2026-08-01 04:23:32,130 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-i: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-i
+2026-08-01 04:23:32,131 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-i
+2026-08-01 04:23:32,425 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-ii: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-ii
+2026-08-01 04:23:32,426 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-ii
+2026-08-01 04:23:32,722 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-iii: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-iii
+2026-08-01 04:23:32,723 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-iii
+2026-08-01 04:23:33,014 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-iv: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-iv
+2026-08-01 04:23:33,015 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-iv
+2026-08-01 04:23:33,314 - ERROR - Error parsing http://herzog.economia.unam.mx/academia/inae/index.php/inae-v: 500 Server Error: Internal Server Error for url: https://herzog.economia.unam.mx/academia/inae/index.php/inae-v
+2026-08-01 04:23:33,315 - WARNING - No PDF links found in http://herzog.economia.unam.mx/academia/inae/index.php/inae-v
